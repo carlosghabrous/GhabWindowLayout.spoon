@@ -3,35 +3,54 @@ local obj = {}
 obj.__index = obj
 obj.name = "GhabWindowLayout"
 
-local laptopScreen = hs.screen.allScreens()[1]:name()
-local extraScreen = hs.screen.allScreens()[2]:name()
 
-local layoutLaptopOnly = {
-    {"Firefox", nil, laptopScreen, hs.layout.maximized, nil, nil},
-}
+-- local laptopScreen = hs.screen.allScreens()[1]:name()
+-- local extraScreen = hs.screen.allScreens()[2]:name()
 
-local layoutExtraScreen = {
-    {"Firefox", nil, laptopScreen, hs.layout.maximized, nil, nil},
-    {"Code", nil, extraScreen, hs.layout.apply(), nil, nil},
-}
+-- local layoutLaptopOnly = {
+    --     {"Firefox", nil, laptopScreen, hs.layout.maximized, nil, nil}, -- first space
+    --     {"Code", nil, laptopScreen, hs.layout.maximized, nil, nil}, -- second space
+    --     {"iTerm2", nil, laptopScreen, hs.layout.maximized, nil, nil}, -- third space
+    --     {"Spotify", nil, extraScreen, hs.layout.maximized, nil, nil},
+    -- }
+    
+-- local layoutExtraScreen = {
+    --     {"Firefox", nil, laptopScreen, hs.layout.maximized, nil, nil},
+    --     {"Code", nil, extraScreen, hs.layout.maximized, nil, nil},
+    --     {"iTerm2", nil, extraScreen, hs.layout.maximized, nil, nil},
+    -- }
+    
+    -- function obj:_numberOfScreens()
+    --     local count = 0
+    --     for _ in pairs(hs.screen.allScreens()) 
+    --     do 
+    --         count = count + 1
+    --     end
+    --     return count
+    -- end
 
-function obj:_numberOfScreens()
-    local count = 0
-    for _ in pairs(hs.screen.allScreens()) 
-    do 
-        count = count + 1
-    end
-    return count
+-- Function
+-- Sets the default log level and initializes a log instance with that default value
+function obj:initLogger()
+    local logLevel = 3
+    obj.logger = hs.logger.new(obj.name)
+    obj.logger.setLogLevel(logLevel)
+    
 end
-
+        
+-- Function
 function obj:init()
-    print(string.format("Loading %s...", obj.name))
+    obj:initLogger()
+    obj.logger.i(string.format("Loading %s...", obj.name))
+    obj.logger.i("Loading bindings...")
+    obj.logger.i("Restoring last layout...")
 
-    if self:_numberOfScreens() == 2 then
-        hs.layout.apply(layoutExtraScreen)
-    else
-        hs.layout.apply(layoutLaptopOnly)
-    end
+
+    -- if self:_numberOfScreens() == 2 then
+    --     hs.layout.apply(layoutExtraScreen)
+    -- else
+    --     hs.layout.apply(layoutLaptopOnly)
+    -- end
         
 end
 
