@@ -33,6 +33,39 @@ end
 
 
 function obj:initWindowMovementBinding()
+    local hotKey = {"ctrl", "alt"}
+
+    hs.hotkey.bind(hotKey, "right", function()
+        local win = hs.window.focusedWindow()
+        local f = win:frame()
+
+        f.x = f.x + 20
+        win:setFrame(f)
+    end)
+
+    hs.hotkey.bind(hotKey, "left", function()
+        local win = hs.window.focusedWindow()
+        local f = win:frame()
+
+        f.x = f.x - 20
+        win:setFrame(f)
+    end)
+
+    hs.hotkey.bind(hotKey, "up", function()
+        local win = hs.window.focusedWindow()
+        local f = win:frame()
+
+        f.y = f.y - 20
+        win:setFrame(f)
+    end)
+
+    hs.hotkey.bind(hotKey, "down", function()
+        local win = hs.window.focusedWindow()
+        local f = win:frame()
+
+        f.y = f.y + 20
+        win:setFrame(f)
+    end)
 end
 
 -- Function
