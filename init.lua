@@ -28,6 +28,12 @@ obj.name = "GhabWindowLayout"
     --     end
     --     return count
     -- end
+function obj:restoreLastRecordedLayout
+end
+
+
+function obj:initWindowMovementBinding
+end
 
 -- Function
 -- Sets the default log level and initializes a log instance with that default value
@@ -37,14 +43,18 @@ function obj:initLogger()
     obj.logger.setLogLevel(logLevel)
     
 end
-        
+
 -- Function
 function obj:init()
     obj:initLogger()
+    
     obj.logger.i(string.format("Loading %s...", obj.name))
+    
     obj.logger.i("Loading bindings...")
-    obj.logger.i("Restoring last layout...")
+    obj:initWindowMovementBinding()
 
+    obj.logger.i("Restoring last layout...")
+    obj:restoreLastRecordedLayout()
 
     -- if self:_numberOfScreens() == 2 then
     --     hs.layout.apply(layoutExtraScreen)
