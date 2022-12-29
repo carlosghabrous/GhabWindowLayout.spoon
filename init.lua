@@ -28,11 +28,11 @@ obj.name = "GhabWindowLayout"
     --     end
     --     return count
     -- end
-function obj:restoreLastRecordedLayout
+function obj:restoreLastRecordedLayout()
 end
 
 
-function obj:initWindowMovementBinding
+function obj:initWindowMovementBinding()
 end
 
 -- Function
