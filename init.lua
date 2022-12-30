@@ -31,7 +31,7 @@ obj.name = "GhabWindowLayout"
 function obj:restoreLastRecordedLayout()
 end
 
-function obj:initWindowToSpaceBinding()
+function obj:moveWindowToSpace(direction)
     local focusedWindow = hs.window.focusedWindow()
     if not focusedWindow then
         obj.logger.w("Focused window does not exist (nil)")
@@ -39,13 +39,67 @@ function obj:initWindowToSpaceBinding()
     end 
 
     if not focusedWindow:isStandard() then
-        obj.logger.wf(focusedWindow:name(), "is not a standard window")
+        obj.logger.wf("%d%s", focusedWindow:id(), "is not a standard window")
         return
     end 
 
-    -- addSpaceToScreen
-    -- focusedWindow
-    -- moveWindowToSpace
+    if focusedWindow:isFullScreen() then
+        obj.logger.wf("%d%s", focusedWindow:id(), "cannot be moved, is fulled-screen")
+        return
+    end
+
+    local screenUUID = focusedWindow:screen():getUUID()
+    
+    -- spaces of the screen where the focused window is
+    local spacesForScreen = nil
+    for screen, spaces in pairs(hs.spaces.allSpaces()) do
+        spacesForScreen = spaces
+        if screen == screenUUID then break end
+    end
+    if not spacesForScreen then return end
+    obj.logger.df("%s %s", "spacesFoScreen", spacesForScreen)
+
+    -- we get the first space where the window appears
+    local thisSpace = hs.spaces.windowSpaces(focusedWindow)
+    if not thisSpace then return else thisSpace = thisSpace[1] end
+    obj.logger.df("%s: %s", "this space is", thisSpace)
+
+    local destSpace = nil
+    for i, space in ipairs(spacesForScreen) do
+        obj.logger.df("%s: %d, %s: %s", "i is", i, "space is", space)
+        if space == thisSpace then
+            if direction == "left" then
+                if i > 1 then
+                    destSpace = spacesForScreen[i-1]
+                    break
+                end
+            elseif direction == "right" then
+                if i < #(spacesForScreen) then
+                    destSpace = spacesForScreen[i+1]
+                    break
+                end
+            end
+        end
+    end
+
+    if destSpace == nil then 
+        obj.logger.wf("%s %s %s %s", "cannot move to the", direction, "from space", thisSpace)
+        return
+    end
+
+    obj.logger.df("%s %s: %s", "new selected space for dir", direction, destSpace)
+    hs.space.moveWindowToSpace(focusedWindow, destSpace)
+end
+
+function obj:initWindowToSpaceBinding()
+
+    hs.hotkey.bind({"ctrl", "alt"}, "right", function()
+        obj:moveWindowToSpace("right")
+    end)
+
+    hs.hotkey.bind({"ctrl", "alt"}, "left", function()
+        obj:moveWindowToSpace("left")
+    end)
 end
 
 function obj:initWindowMovementBinding()
@@ -87,7 +141,7 @@ end
 -- Function
 -- Sets the default log level and initializes a log instance with that default value
 function obj:initLogger()
-    local logLevel = 3
+    local logLevel = 6
     obj.logger = hs.logger.new(obj.name)
     obj.logger.setLogLevel(logLevel)
     
