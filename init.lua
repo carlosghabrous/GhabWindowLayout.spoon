@@ -31,34 +31,45 @@ obj.name = "GhabWindowLayout"
 function obj:restoreLastRecordedLayout()
 end
 
-function obj:moveWindowToSpace(direction)
-    local focusedWindow = hs.window.focusedWindow()
-    if not focusedWindow then
+-- SECTION 
+-- This part of the file is about moving windows to other spaces
+function obj:_doFocusedWindowChecks(focusedWin)
+    if not focusedWin then
         obj.logger.w("Focused window does not exist (nil)")
         return 
     end 
-
-    if not focusedWindow:isStandard() then
-        obj.logger.wf("%d%s", focusedWindow:id(), "is not a standard window")
+    
+    if not focusedWin:isStandard() then
+        obj.logger.wf("%d%s", focusedWin:id(), "is not a standard focusedWin")
         return
     end 
-
-    if focusedWindow:isFullScreen() then
-        obj.logger.wf("%d%s", focusedWindow:id(), "cannot be moved, is fulled-screen")
+    
+    if focusedWin:isFullScreen() then
+        obj.logger.wf("%d%s", focusedWin:id(), "cannot be moved, is fulled-screen")
         return
     end
+end
 
-    local screenUUID = focusedWindow:screen():getUUID()
-    
-    -- spaces of the screen where the focused window is
+function obj:_getSpacesForScreen(window)
     local spacesForScreen = nil
+    local screenUUID = window:screen():getUUID()
+
     for screen, spaces in pairs(hs.spaces.allSpaces()) do
         spacesForScreen = spaces
         if screen == screenUUID then break end
     end
-    if not spacesForScreen then return end
-    obj.logger.df("%s %s", "spacesFoScreen", spacesForScreen)
 
+    return spacesForScreen
+end
+
+function obj:moveWindowToSpace(direction)
+    local focusedWindow = hs.window.focusedWindow()
+    if focusedWindow == nil then obj.logger.i("focused window DOES NOT EXIST!") end
+    obj:_doFocusedWindowChecks(focusedWindow)
+
+    local spacesForScreen = obj:_getSpacesForScreen(focusedWindow)
+    if spacesForScreen == nil then return end
+    
     -- we get the first space where the window appears
     local thisSpace = hs.spaces.windowSpaces(focusedWindow)
     if not thisSpace then return else thisSpace = thisSpace[1] end
