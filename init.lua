@@ -31,6 +31,22 @@ obj.name = "GhabWindowLayout"
 function obj:restoreLastRecordedLayout()
 end
 
+function obj:initWindowToSpaceBinding()
+    local focusedWindow = hs.window.focusedWindow()
+    if not focusedWindow then
+        obj.logger.w("Focused window does not exist (nil)")
+        return 
+    end 
+
+    if not focusedWindow:isStandard() then
+        obj.logger.wf(focusedWindow:name(), "is not a standard window")
+        return
+    end 
+
+    -- addSpaceToScreen
+    -- focusedWindow
+    -- moveWindowToSpace
+end
 
 function obj:initWindowMovementBinding()
     local hotKey = {"ctrl", "alt"}
@@ -85,6 +101,7 @@ function obj:init()
     
     obj.logger.i("Loading bindings...")
     obj:initWindowMovementBinding()
+    obj:initWindowToSpaceBinding()
 
     obj.logger.i("Restoring last layout...")
     obj:restoreLastRecordedLayout()
