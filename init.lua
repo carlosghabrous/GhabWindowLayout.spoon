@@ -4,31 +4,43 @@ obj.__index = obj
 obj.name = "GhabWindowLayout"
 
 
--- local laptopScreen = hs.screen.allScreens()[1]:name()
--- local extraScreen = hs.screen.allScreens()[2]:name()
+local screens = {}
+screens.laptop = hs.screen{x=0, y=0}
+screens.extra = hs.screen{x=1, y=0}
 
--- local layoutLaptopOnly = {
-    --     {"Firefox", nil, laptopScreen, hs.layout.maximized, nil, nil}, -- first space
-    --     {"Code", nil, laptopScreen, hs.layout.maximized, nil, nil}, -- second space
-    --     {"iTerm2", nil, laptopScreen, hs.layout.maximized, nil, nil}, -- third space
-    --     {"Spotify", nil, extraScreen, hs.layout.maximized, nil, nil},
-    -- }
+local layouts = {}
+layouts.upTwoThirds = hs.geometry.rect(0, 0, 1, 0.67)
+layouts.downOneThird = hs.geometry.rect(0, 0.67, 1, 0.33)
+
+local layoutLaptopOnly = {
+        {"Firefox", nil, screens.laptop, hs.layout.maximized, nil, nil}, -- first space
+        {"Code", nil, screens.laptop, hs.layout.maximized, nil, nil}, -- second space
+        {"iTerm2", nil, screens.laptop, hs.layout.maximized, nil, nil}, -- third space
+        {"Spotify", nil, screens.laptop, hs.layout.maximized, nil, nil},
+    }
     
--- local layoutExtraScreen = {
-    --     {"Firefox", nil, laptopScreen, hs.layout.maximized, nil, nil},
-    --     {"Code", nil, extraScreen, hs.layout.maximized, nil, nil},
-    --     {"iTerm2", nil, extraScreen, hs.layout.maximized, nil, nil},
-    -- }
-    
-    -- function obj:_numberOfScreens()
-    --     local count = 0
-    --     for _ in pairs(hs.screen.allScreens()) 
-    --     do 
-    --         count = count + 1
-    --     end
-    --     return count
-    -- end
-function obj:restoreLastRecordedLayout()
+    local layoutExtraScreen = {
+        {"Firefox", nil, screens.laptop, hs.layout.maximized, nil, nil},
+        {"Code", nil, screens.extra, layouts.upTwoThirds, nil, nil},
+        {"iTerm2", nil, screens.extra, layouts.downOneThird, nil, nil},
+        {"Spotify", nil, screens.extra, hs.layout.maximized, nil, nil},
+    }
+
+local defaultLayouts = {}
+defaultLayouts[1] = layoutLaptopOnly
+defaultLayouts[2] = layoutExtraScreen
+
+local function loadConfiguration(n_screens)
+    -- if file with layout exists then load layout from there
+    -- fh = io.open("layouts.json", "r")
+    -- otherwise load a default layout
+    return defaultLayouts[n_screens]
+end
+
+function obj:restoreLastRecordedLayout(n_screens)
+    obj.logger.i("File not found. Restoring default layouts...")
+    layout = loadConfiguration(n_screens)
+    hs.layout.apply(layout)
 end
 
 -- SECTION 
@@ -166,6 +178,7 @@ end
 
 -- Function
 function obj:init()
+    hs.application.enableSpotlightForNameSearches(true)
     obj:initLogger()
     
     obj.logger.i(string.format("Loading %s...", obj.name))
@@ -175,8 +188,7 @@ function obj:init()
     obj:initWindowToSpaceBinding()
 
     obj.logger.i("Restoring last layout...")
-    obj:restoreLastRecordedLayout()
-
+    obj:restoreLastRecordedLayout(#(hs.screen.allScreens()))
     -- if self:_numberOfScreens() == 2 then
     --     hs.layout.apply(layoutExtraScreen)
     -- else
