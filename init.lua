@@ -23,7 +23,7 @@ local layoutLaptopOnly = {
         {"Firefox", nil, screens.laptop, hs.layout.maximized, nil, nil},
         {"Code", nil, screens.extra, layouts.upTwoThirds, nil, nil},
         {"iTerm2", nil, screens.extra, layouts.downOneThird, nil, nil},
-        {"Spotify", nil, screens.extra, hs.layout.maximized, nil, nil},
+        {"Spotify", nil, screens.laptop, hs.layout.maximized, nil, nil},
     }
 
 local defaultLayouts = {}
@@ -31,9 +31,6 @@ defaultLayouts[1] = layoutLaptopOnly
 defaultLayouts[2] = layoutExtraScreen
 
 local function loadConfiguration(n_screens)
-    -- if file with layout exists then load layout from there
-    -- fh = io.open("layouts.json", "r")
-    -- otherwise load a default layout
     return defaultLayouts[n_screens]
 end
 
