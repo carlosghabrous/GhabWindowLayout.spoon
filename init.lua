@@ -33,19 +33,19 @@ end
 
 -- SECTION 
 -- This part of the file is about moving windows to other spaces
-function obj:_doFocusedWindowChecks(focusedWin)
-    if not focusedWin then
+function obj:_doFocusedWindowChecks(window)
+    if not window then
         obj.logger.w("Focused window does not exist (nil)")
         return 
     end 
     
-    if not focusedWin:isStandard() then
-        obj.logger.wf("%d%s", focusedWin:id(), "is not a standard focusedWin")
+    if not window:isStandard() then
+        obj.logger.wf("%d%s", window:id(), "is not a standard window")
         return
     end 
     
-    if focusedWin:isFullScreen() then
-        obj.logger.wf("%d%s", focusedWin:id(), "cannot be moved, is fulled-screen")
+    if window:isFullScreen() then
+        obj.logger.wf("%d%s", window:id(), "cannot be moved, is fulled-screen")
         return
     end
 end
@@ -62,6 +62,33 @@ function obj:_getSpacesForScreen(window)
     return spacesForScreen
 end
 
+function obj:_selectDestinationSpace(window, spaces, direction)
+    local thisSpace = hs.spaces.windowSpaces(window)
+
+    if not thisSpace then return else thisSpace = thisSpace[1] end
+    obj.logger.df("%s: %s", "this space is", thisSpace)
+
+    local destSpace = nil
+    for i, space in ipairs(spaces) do
+        obj.logger.df("%s: %d, %s: %s", "i is", i, "space is", space)
+        if space == thisSpace then
+            if direction == "left" then
+                if i > 1 then
+                    destSpace = spaces[i-1]
+                    break
+                end
+            elseif direction == "right" then
+                if i < #(spaces) then
+                    destSpace = spaces[i+1]
+                    break
+                end
+            end
+        end
+    end
+
+    return destSpace
+end
+
 function obj:moveWindowToSpace(direction)
     local focusedWindow = hs.window.focusedWindow()
     if focusedWindow == nil then obj.logger.i("focused window DOES NOT EXIST!") end
@@ -70,36 +97,15 @@ function obj:moveWindowToSpace(direction)
     local spacesForScreen = obj:_getSpacesForScreen(focusedWindow)
     if spacesForScreen == nil then return end
     
-    -- we get the first space where the window appears
-    local thisSpace = hs.spaces.windowSpaces(focusedWindow)
-    if not thisSpace then return else thisSpace = thisSpace[1] end
-    obj.logger.df("%s: %s", "this space is", thisSpace)
-
-    local destSpace = nil
-    for i, space in ipairs(spacesForScreen) do
-        obj.logger.df("%s: %d, %s: %s", "i is", i, "space is", space)
-        if space == thisSpace then
-            if direction == "left" then
-                if i > 1 then
-                    destSpace = spacesForScreen[i-1]
-                    break
-                end
-            elseif direction == "right" then
-                if i < #(spacesForScreen) then
-                    destSpace = spacesForScreen[i+1]
-                    break
-                end
-            end
-        end
-    end
-
+    local destSpace = obj:_selectDestinationSpace(focusedWindow, spacesForScreen, direction)
+    
     if destSpace == nil then 
-        obj.logger.wf("%s %s %s %s", "cannot move to the", direction, "from space", thisSpace)
+        obj.logger.wf("%s %s %s", "cannot move to the", direction, "from this space")
         return
     end
-
+    
     obj.logger.df("%s %s: %s", "new selected space for dir", direction, destSpace)
-    hs.space.moveWindowToSpace(focusedWindow, destSpace)
+    hs.spaces.moveWindowToSpace(focusedWindow, destSpace)
 end
 
 function obj:initWindowToSpaceBinding()
