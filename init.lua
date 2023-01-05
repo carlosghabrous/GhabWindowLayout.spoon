@@ -34,9 +34,10 @@ local function loadConfiguration(n_screens)
     return defaultLayouts[n_screens]
 end
 
-function obj:restoreLastRecordedLayout(n_screens)
+function obj:restoreLastRecordedLayout()
     obj.logger.i("File not found. Restoring default layouts...")
-    layout = loadConfiguration(n_screens)
+    local n_screens = #(hs.screen.allScreens())
+    local layout = loadConfiguration(n_screens)
     hs.layout.apply(layout)
 end
 
@@ -185,12 +186,7 @@ function obj:init()
     obj:initWindowToSpaceBinding()
 
     obj.logger.i("Restoring last layout...")
-    obj:restoreLastRecordedLayout(#(hs.screen.allScreens()))
-    -- if self:_numberOfScreens() == 2 then
-    --     hs.layout.apply(layoutExtraScreen)
-    -- else
-    --     hs.layout.apply(layoutLaptopOnly)
-    -- end
+    hs.hotkey.bind({"ctrl", "alt"}, "r", function() obj:restoreLastRecordedLayout() end)
         
 end
 
